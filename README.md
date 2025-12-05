@@ -20,8 +20,10 @@ Reinforcement Learning Toolbox
 강화학습 설계
 
 State (8개)
+
 차량 상태를 나타내는 8개 변수
 [속도, 가속도, 페달입력, SOC, 현재기어, 효율, 파워, 목표속도]
+
 Action (2개)
 
 Action 0: 1단 유지
@@ -31,9 +33,12 @@ Action 1: 2단 유지
 
 Reward
 
-matlabR = -속도오차² × 10 + (효율-0.5) × 20 - 변속페널티 × 5
+matlabR = -속도오차² × 10 + (모터효율-0.5) × 20 - 변속페널티 × 5
+
 DQN 구조
+
 Input(8) → FC(128) → ReLU → FC(128) → ReLU → FC(64) → ReLU → Output(2)
+
 주요 파라미터
 
 Learning Rate: 5e-4
