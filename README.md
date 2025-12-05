@@ -2,6 +2,7 @@ EREV Transmission Control using Deep Reinforcement Learning
 강화학습개론 프로젝트 - 강화학습 기반 EREV 변속 제어
 
 프로젝트 개요
+
 EREV(Extended Range Electric Vehicle) 차량의 2단 변속기를 DQN 알고리즘으로 제어하는 프로젝트입니다. 기존 Rule-based 방식 대신 강화학습을 통해 최적 변속 타이밍을 학습시켰습니다.
 
 개발 환경
