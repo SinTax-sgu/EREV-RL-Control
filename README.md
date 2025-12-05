@@ -3,6 +3,7 @@ EREV Transmission Control using Deep Reinforcement Learning
 
 프로젝트 개요
 EREV(Extended Range Electric Vehicle) 차량의 2단 변속기를 DQN 알고리즘으로 제어하는 프로젝트입니다. 기존 Rule-based 방식 대신 강화학습을 통해 최적 변속 타이밍을 학습시켰습니다.
+
 개발 환경
 
 MATLAB R2025b
@@ -16,6 +17,7 @@ Reinforcement Learning Toolbox
 
 
 강화학습 설계
+
 State (8개)
 차량 상태를 나타내는 8개 변수
 [속도, 가속도, 페달입력, SOC, 현재기어, 효율, 파워, 목표속도]
@@ -25,7 +27,9 @@ Action 0: 1단 유지
 Action 1: 2단 유지
 
 *엔진 발전은 SOC 기반 룰로 따로 제어
+
 Reward
+
 matlabR = -속도오차² × 10 + (효율-0.5) × 20 - 변속페널티 × 5
 DQN 구조
 Input(8) → FC(128) → ReLU → FC(128) → ReLU → FC(64) → ReLU → Output(2)
@@ -39,6 +43,7 @@ Batch Size: 128
 
 
 파일 구조
+
 EREV-RL-Control/
 ├── models/
 │   └── EREV_Model.slx          # Simulink 차량 모델
@@ -53,7 +58,9 @@ EREV-RL-Control/
     └── presentation.pptx       # 발표 자료
 
 실행 방법
+
 1. Agent 생성
+   
 matlabcd scripts
 run('create_EREV_agent.m')
 
@@ -62,6 +69,7 @@ DQN agent 설정
 agent 파일로 저장
 
 2. 학습 실행
+   
 matlabrun('train_EREV_agent.m')
 
 Simulink 모델과 연동
@@ -69,6 +77,7 @@ UDDS 사이클로 학습
 학습 시간: 약 20시간 (500 episodes)
 
 3. 학습 모니터링
+   
 MATLAB Training Progress 창에서 실시간 확인
 
 Episode Reward
@@ -76,11 +85,13 @@ Q-value
 Average Return
 
 4. 학습된 agent 테스트
+   
 matlabload('trained_agents/agent_final.mat')
 open_system('models/EREV_Model.slx')
 sim('models/EREV_Model.slx')
 
 학습 설정
+
 Training Options
 matlabMaxEpisodes = 500
 MaxStepsPerEpisode = 13690  % UDDS 사이클 길이
@@ -91,9 +102,11 @@ UDDS (Urban Dynamometer Driving Schedule)
 
 
 결과
+
 (학습 완료 후 업데이트 예정)
 
 구현 시 고민했던 점
+
 1. State Space 설계
 
 처음엔 6차원으로 했다가 목표속도, 파워 추가해서 8차원으로 확장
