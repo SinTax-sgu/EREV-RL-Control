@@ -13,8 +13,14 @@ EREV 차량의 2단 변속기를 DQN 알고리즘으로 제어하는 프로젝�
 
 **개발 환경**
 - MATLAB R2025b
-- Simulink
+- Simulink (EREV 차량 동역학 모델)
 - Reinforcement Learning Toolbox
+
+**Environment**
+- Simulink로 구현한 EREV 차량 모델
+- 2단 변속기, 전/후륜 모터, 배터리, 엔진 포함
+- UDDS 주행 사이클 기반 시뮬레이션
+- 차량 제원: Hyundai Santa Fe PHEV 2024 기반
 
 **목표**
 - 주행 중 최적 변속 타이밍 학습
@@ -218,7 +224,3 @@ sim('models/EREV_Model.slx')
 [2] MATLAB Reinforcement Learning Toolbox Documentation
 
 ---
-
-
-
-
