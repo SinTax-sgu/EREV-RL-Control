@@ -1,106 +1,49 @@
-# EREV Transmission Control using Deep Reinforcement Learning
+# EREV RL Control
 
-강화학습개론 프로젝트 - DQN 기반 EREV 변속 제어
-
-작성자: 박준현 (기계공학과)  
-날짜: 2025.12
+DQN 기반 EREV 2단 변속기 제어
 
 ---
 
 ## 1. 프로젝트 개요
 
-EREV 차량의 2단 변속기를 DQN 알고리즘으로 제어하는 프로젝트입니다.
+강화학습(DQN)을 이용한 EREV 차량 2단 변속기 최적 제어
 
-**개발 환경**
-- MATLAB R2025b
-- Simulink (EREV 차량 동역학 모델)
+- 차량: Hyundai Santa Fe PHEV 기반
+- 주행 사이클: UDDS (1,369초, 11.96km)
+- 알고리즘: DQN
+- Reward 함수 가중치를 변경하여 3가지 버전 실험
+
+---
+
+## 2. State & Action
+
+**State Space (8차원)**
+```
+[속도, 가속도, 페달입력, SOC, 현재기어, 모터효율, 모터파워, 목표속도]
+```
+
+**Action Space (2개)**
+- Action 1: 1단 유지
+- Action 2: 2단 유지
+
+**Reward Function**
+```
+R = -(v - v_target)² × 0.02 + eff_motor × W + shift × P_shift
+```
+
+**DQN Network**
+```
+Input(8) → FC(128,ReLU) → FC(128,ReLU) → FC(64,ReLU) → Output(2)
+```
+
+---
+
+## 3. 필수 환경
+
+MATLAB R2025a 이상
+- Simulink
+- Deep Learning Toolbox
 - Reinforcement Learning Toolbox
-
-**Environment**
-- Simulink로 구현한 EREV 차량 모델
-- 2단 변속기, 전/후륜 모터, 배터리, 엔진 포함
-- UDDS 주행 사이클 기반 시뮬레이션
-- 차량 제원: Hyundai Santa Fe PHEV 2024 기반
-
-**목표**
-- 주행 중 최적 변속 타이밍 학습
-- 속도 추종과 연비 최적화
-
----
-
-## 2. 강화학습 설계
-
-### 2.1 State (8차원)
-```
-[속도, 가속도, 페달입력, SOC, 현재기어, 효율, 파워, 목표속도]
-```
-
-### 2.2 Action (2개)
-- Action 0: 1단 유지
-- Action 1: 2단 유지
-
-엔진 발전은 SOC 기반 Rule-based 제어
-- SOC < 30%: 엔진 ON
-- SOC > 40%: 엔진 OFF
-
-### 2.3 Reward Function
-```
-R = -속도오차² × 0.02 + eff_Motor × W
-```
-
-W: eff_Motor 가중치 (실험별 변경)
-- Version A: W = 10
-- Version B: W = 15
-- Version C: W = 20
-
-추가 조건:
-- 속도 오차 10km/h 이상 5초 지속 시 종료 (Reward -100)
-- 변속 시 0.3초간 50% 동력 전달
-
-### 2.4 DQN 구조
-
-**Neural Network**
-```
-Input(8) → FC(128) → ReLU → FC(128) → ReLU → FC(64) → ReLU → Output(2)
-```
-
-**Hyperparameter**
-- Learning Rate: 5e-4
-- Discount Factor: 0.995
-- Experience Buffer: 50,000
-- Epsilon Decay: 0.995
-- Batch Size: 128
-
----
-
-## 3. 실험 조건
-
-### 3.1 Hyperparameter 비교
-eff_Motor 가중치를 변경하여 효율 중시 정도 조절
-
-- Version A: W = 10 (Baseline)
-- Version B: W = 15 (효율 강조)
-- Version C: W = 20 (효율 극대화)
-
-### 3.2 Random Seed 재현성 검증
-각 조건을 Random seed와 Fixed seed(42)로 2회 실험하여 재현 가능성 확인
-
-### 3.3 실험 요약
-
-| 실험명 | eff gain | Random Seed | 비고 |
-|--------|----------|-------------|------|
-| A | 10 | Random | Baseline |
-| B | 15 | Random | 효율 강조 |
-| C | 20 | Random | 효율 극대화 |
-| A2 | 10 | 42 (고정) | A 재현 |
-| B2 | 15 | 42 (고정) | B 재현 |
-| C2 | 20 | 42 (고정) | C 재현 |
-
-### 3.4 학습 설정
-- Episodes: 1000
-- 주행 사이클: UDDS (1369초, 11.99km)
-- 학습 시간: 약 6-8시간/실험
-- 총 실험 횟수: 6회 (3가지 조건 × 2회)
 
 ---
 
@@ -108,119 +51,103 @@ eff_Motor 가중치를 변경하여 효율 중시 정도 조절
 
 ```
 EREV-RL-Control/
-├── models/
-│   └── EREV_Model.slx              (Simulink 차량 모델)
-├── scripts/
-│   ├── create_EREV_agent.m         (DQN agent 생성)
-│   ├── train_EREV_agent.m          (학습 실행)
-│   ├── EREV_RL_Parameters.m        (차량 파라미터)
-│   └── Reward_Calculator.m         (보상 함수)
-├── results/
-│   ├── agent_A_eff10_random.mat    (학습 결과)
-│   ├── agent_B_eff15_random.mat
-│   ├── agent_C_eff20_random.mat
-│   ├── agent_A_eff10_seed42.mat
-│   ├── agent_B_eff15_seed42.mat
-│   ├── agent_C_eff20_seed42.mat
-│   └── figures/                    (그래프)
-├── report/
-│   └── presentation.pptx           (발표 자료)
-└── README.md
+├─ models/
+│  └─ EREV_1_Model_RL.slx          # Simulink 차량 모델
+│
+├─ scripts/
+│  ├─ create_EREV_agent.m          # Agent 생성 (먼저 실행)
+│  ├─ EREV_RL_Parameters.m         # 차량 파라미터
+│  ├─ train_EREV_agent.m           # 학습 실행
+│  └─ calculate_EREV_efficiency.m  # 성능 비교 
+│
+├─ results/
+│  ├─ agents/
+│  │  ├─ agent_A_random.mat        # Ver A (Random seed)
+│  │  ├─ agent_A_seed42.mat        # Ver A (Fixed seed)
+│  │  ├─ agent_B_random.mat        # Ver B (Random seed)
+│  │  ├─ agent_B_seed42.mat        # Ver B (Fixed seed)
+│  │  ├─ agent_C_random.mat        # Ver C (Random seed)
+│  │  └─ agent_C_seed42.mat        # Ver C (Fixed seed)
+│  │
+│  └─ training_curves/             # 학습 곡선 그래프
+│
+├─ report/
+│  ├─ 강화학습프로젝트보고서_20201807.pptx    # PPT 보고서
+│  └─ EREV_모델링_자료.pptx         # 추가 자료 (차량 모델링)
+│
+└─ README.md
 ```
 
 ---
 
 ## 5. 실행 방법
 
-### 5.1 Agent 생성 및 학습 준비
-
-MATLAB에서:
-
-1. Agent 생성
+### 5.1 Agent 생성
 ```matlab
 cd scripts
 run('create_EREV_agent.m')
 ```
-출력: EREV_RL_agent.mat
 
-2. 파라미터 파일 실행
+### 5.2 파라미터 로드
 ```matlab
 run('EREV_RL_Parameters.m')
 ```
-(차량 파라미터 workspace에 로드)
 
-### 5.2 학습 실행 (Random seed)
+### 5.3 학습 실행
 
-Reward_Calculator.m에서 eff_Motor 가중치 설정 후:
+Simulink 모델에서 MATLAB Function 블록의 Reward 가중치 수정:
+```
+W_eff = 10;      # Ver A: 10, Ver B/C: 20
+P_shift = 0;     # Ver A/C: 0, Ver B: -0.03
+```
+
+학습 실행:
 ```matlab
 run('train_EREV_agent.m')
 ```
 
-과정:
-1. Simulink 모델 로드
-2. UDDS 사이클로 학습 (1000 episodes)
-3. Training Progress 창 표시
-4. 완료 후 자동 저장
-
-### 5.3 학습 실행 (Fixed seed)
-
-train_EREV_agent.m 맨 위에 추가:
+Fixed seed로 학습하려면 train_EREV_agent.m 상단에 추가:
 ```matlab
 rng(42, 'twister');
 ```
 
-이후 5.2와 동일하게 실행
-
-### 5.4 결과 확인
-
-학습된 agent 테스트:
+### 5.4 테스트
 ```matlab
-load('results/agent_A_eff10_random.mat')
-open_system('models/EREV_Model.slx')
-sim('models/EREV_Model.slx')
+load('results/agents/agent_A_random.mat')
+open_system('models/EREV_1_Model_RL.slx')
+sim('models/EREV_1_Model_RL.slx')
 ```
 
 ---
 
-## 6. 실험 결과
+## 6. 실험 내용
 
-### 6.1 성능 비교
+총 3가지 Reward 함수 버전으로 실험:
 
-| 실험명 | eff gain | Seed | 연비(km/L) | 변속횟수 | Episode Reward |
-|--------|----------|------|-----------|----------|----------------|
-| Rule | - | - | 151 | - | - |
-| A | 10 | Random | TBD | TBD | TBD |
-| A2 | 10 | 42 | TBD | TBD | TBD |
-| B | 15 | Random | TBD | TBD | TBD |
-| B2 | 15 | 42 | TBD | TBD | TBD |
-| C | 20 | Random | TBD | TBD | TBD |
-| C2 | 20 | 42 | TBD | TBD | TBD |
+| 버전 | W (eff) | P_shift | 설명 |
+|------|---------|---------|------|
+| Ver A | 10 | 0.00 | Baseline |
+| Ver B | 20 | -0.03 | 변속 비용 반영 |
+| Ver C | 20 | 0.00 | 효율 극대화 |
 
-(학습 완료 후 업데이트 예정)
+각 버전당 Random seed, Fixed seed(42) 2회씩 학습.
 
-### 6.2 분석 지표
-
-**Hyperparameter 영향**
-- eff_Motor gain에 따른 성능 변화
-- 효율 vs 변속 횟수 trade-off
-
-**Random Seed 영향**
-- 각 조건별 Random vs Fixed seed 결과 비교
-- 재현 가능성 및 결과 안정성
-
-### 6.3 평가 지표
-- 연비 (km/L)
-- 변속 횟수
-- 속도 추종 오차
-- 평균 모터 효율
-- Episode Reward
+학습 조건:
+- Episodes: 1,000
+- Step: 13,690 (0.1초당 1번)
+- 학습 시간: 약 12시간/실험
 
 ---
 
-## 7. 참고 문헌
+## 7. 실험 결과
 
-[1] Mnih et al., "Human-level control through deep reinforcement learning", Nature, 2015
-
-[2] MATLAB Reinforcement Learning Toolbox Documentation
+| Method | 연비 (km/kWh) | 변속 횟수 | 속도 RMSE |
+|--------|---------------|----------|----------|
+| Rule-based | 17.02 | 42 | 0.00278 | ~0.003 |
+| Ver A | 15.52 ± 0.21 | 635 ± 381 | ~0.003 |
+| Ver B | 15.58 ± 0.13 | 128 ± 126 | ~0.003 |
+| Ver C | 15.59 ± 0.14 | 146 ± 143 | ~0.003 |
 
 ---
+
+**Last Updated:** 2025.12.07
