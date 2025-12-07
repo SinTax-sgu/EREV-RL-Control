@@ -223,7 +223,7 @@ G_final_R_2nd = G_2nd;    % Total 2nd gear ratio: 7.0
 % 🆕 Shift Schedule Parameters - OPTIMIZED
 V_upshift_kph = 35;       % Upshift speed [km/h] - OPTIMIZED! (was 50)
 V_downshift_kph = 30;     % Downshift speed [km/h] - OPTIMIZED! (was 35)
-shift_duration = 0.3;     % Shift time [s]
+shift_duration = 0.1;     % Shift time [s]
 
 % Driveline Efficiency
 eff_transmission = 0.97;  % Transmission efficiency
